@@ -5,9 +5,10 @@ const noteCategory = document.getElementById("note-category");
 const notesList = document.getElementById("notes-list");
 const errorMessage = document.getElementById("error-message");
 const noteCount = document.getElementById("note-count");
+const searchInput = document.getElementById("search-input");
 
-// Store all notes
-let notes = [];
+// Load saved notes from localStorage
+let notes = JSON.parse(localStorage.getItem("quickNotes")) || [];
 
 // Update the note count
 function updateNoteCount() {
@@ -20,11 +21,22 @@ function updateNoteCount() {
     }
 }
 
+// Save notes to localStorage
+function saveNotes() {
+    localStorage.setItem("quickNotes", JSON.stringify(notes));
+}
+
 // Display notes on the page
-function renderNotes() {
+function renderNotes(notesToDisplay = notes) {
     notesList.innerHTML = "";
 
-    notes.forEach(function(note) {
+    if (notesToDisplay.length === 0 && searchInput.value.trim() !== "") {
+        notesList.innerHTML = "<li>No notes match your search.</li>";
+        updateNoteCount();
+        return;
+    }
+
+    notesToDisplay.forEach(function(note) {
         const noteItem = document.createElement("li");
 
         noteItem.classList.add("note-card");
@@ -63,7 +75,6 @@ noteForm.addEventListener("submit", function(event) {
         return;
     }
 
-    // Create the note
     const note = {
         id: Date.now(),
         text: text,
@@ -73,10 +84,13 @@ noteForm.addEventListener("submit", function(event) {
 
     notes.push(note);
 
+    // Save the updated notes
+    saveNotes();
+
     // Clear error message
     errorMessage.textContent = "";
 
-    // Display the note
+    // Display the notes
     renderNotes();
 
     // Clear the input
@@ -92,9 +106,23 @@ notesList.addEventListener("click", function(event) {
             return note.id !== noteId;
         });
 
+        // Save the updated notes
+        saveNotes();
+
         renderNotes();
     }
 });
 
-// Show the initial count
-updateNoteCount();
+// Search notes as the user types
+searchInput.addEventListener("input", function() {
+    const searchWords = searchInput.value.toLowerCase().trim();
+
+    const filteredNotes = notes.filter(function(note) {
+        return note.text.toLowerCase().includes(searchWords);
+    });
+
+    renderNotes(filteredNotes);
+});
+
+// Display saved notes when the page opens
+renderNotes();
