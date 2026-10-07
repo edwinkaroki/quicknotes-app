@@ -1,3 +1,4 @@
+const clearAllBtn = document.getElementById("clear-all-btn");
 // Get elements from the HTML
 const noteForm = document.getElementById("note-form");
 const noteInput = document.getElementById("note-input");
@@ -126,3 +127,12 @@ searchInput.addEventListener("input", function() {
 
 // Display saved notes when the page opens
 renderNotes();
+// Clear all notes
+clearAllBtn.addEventListener("click", function() {
+    if (confirm("Delete all notes?")) {
+        notes = [];
+
+        saveNotes();
+        renderNotes();
+    }
+});
